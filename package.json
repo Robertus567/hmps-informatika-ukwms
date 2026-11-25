@@ -1,0 +1,14 @@
+{
+  "name": "hmps-inf-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Website HMPS Informatika UKWMS + pengumuman hasil wawancara anggota baru",
+  "scripts": {
+    "dev": "node dev-server.mjs"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@vercel/blob": "^1.1.1"
+  }
+}
