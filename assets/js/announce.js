@@ -158,13 +158,14 @@
   /* ---------- FX engine (canvas particles) ---------- */
   function FX(canvas) {
     const ctx = canvas.getContext('2d');
-    let W = 0, H = 0, raf = 0, alive = true;
+    let W = 0, H = 0, raf = 0, alive = true, idle = false, dpr = 1;
     const P = [];
     const COLORS = ['#ffffff', '#dbeeff', '#9fd8ff', '#3da9e4', '#2e6bff', '#5b8cff', '#bcd0ff'];
     const CONF = ['#ffffff', '#7fd0ff', '#3da9e4', '#2e6bff', '#1652f0', '#c9dcff', '#ffd36b'];
     const pick = (a) => a[(Math.random() * a.length) | 0];
     function size() {
-      const dpr = Math.min(2, window.devicePixelRatio || 1);
+      // tiny particles look identical at 1.5x; fewer pixels to clear and draw each frame on phones
+      dpr = Math.min(window.innerWidth < 760 ? 1.5 : 2, window.devicePixelRatio || 1);
       W = canvas.clientWidth; H = canvas.clientHeight;
       canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -206,28 +207,52 @@
       stop() { alive = false; cancelAnimationFrame(raf); window.removeEventListener('resize', size); P.length = 0; ctx.clearRect(0, 0, W, H); }
     };
 
+    // Same particles and look as before; the loop just does less work per frame:
+    // swap-remove instead of splice, one transform call per confetti, and blend mode set once per pass.
+    const spawn = [];
     function step() {
       if (!alive) return;
+      if (!P.length && idle) { raf = requestAnimationFrame(step); return; } // nothing to draw
+      idle = !P.length;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       ctx.clearRect(0, 0, W, H);
-      for (let i = P.length - 1; i >= 0; i--) {
+      let n = P.length;
+      for (let i = n - 1; i >= 0; i--) {
         const p = P[i];
         p.vx *= p.drag; p.vy = p.vy * p.drag + p.g;
         p.x += p.vx; p.y += p.vy; p.life -= p.decay;
-        if (p.t === 'r' && p.vy > -1.2) { api.burst(p.x, p.y, 80, 6.5, p.pal); P.splice(i, 1); continue; }
-        if (p.life <= 0 || p.y > H + 60 || p.x < -80 || p.x > W + 80) { P.splice(i, 1); continue; }
-        if (p.t === 'c') {
-          p.rot += p.vr; p.wob += 0.12;
-          ctx.save(); ctx.globalAlpha = Math.min(1, p.life * 1.5); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(1, Math.cos(p.wob));
-          ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
-        } else {
-          ctx.globalCompositeOperation = 'lighter';
-          ctx.globalAlpha = Math.max(0, p.life);
-          ctx.strokeStyle = p.c; ctx.lineWidth = p.size; ctx.lineCap = 'round';
-          ctx.beginPath(); ctx.moveTo(p.x - p.vx * 2.2, p.y - p.vy * 2.2); ctx.lineTo(p.x, p.y); ctx.stroke();
-          ctx.globalCompositeOperation = 'source-over';
-        }
+        let dead = false;
+        if (p.t === 'r' && p.vy > -1.2) { spawn.push(p); dead = true; }
+        else if (p.life <= 0 || p.y > H + 60 || p.x < -80 || p.x > W + 80) dead = true;
+        if (dead) { P[i] = P[n - 1]; n--; }
       }
+      P.length = n;
+      // confetti
+      ctx.globalCompositeOperation = 'source-over';
+      for (let i = 0; i < n; i++) {
+        const p = P[i];
+        if (p.t !== 'c') continue;
+        p.rot += p.vr; p.wob += 0.12;
+        const c = Math.cos(p.rot), sn = Math.sin(p.rot), k = Math.cos(p.wob);
+        ctx.setTransform(dpr * c, dpr * sn, -dpr * sn * k, dpr * c * k, dpr * p.x, dpr * p.y);
+        ctx.globalAlpha = Math.min(1, p.life * 1.5);
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // sparks and rockets (additive glow)
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.lineCap = 'round';
+      for (let i = 0; i < n; i++) {
+        const p = P[i];
+        if (p.t === 'c') continue;
+        ctx.globalAlpha = p.life > 0 ? p.life : 0;
+        ctx.strokeStyle = p.c; ctx.lineWidth = p.size;
+        ctx.beginPath(); ctx.moveTo(p.x - p.vx * 2.2, p.y - p.vy * 2.2); ctx.lineTo(p.x, p.y); ctx.stroke();
+      }
+      ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
+      while (spawn.length) { const r = spawn.pop(); api.burst(r.x, r.y, 80, 6.5, r.pal); }
       raf = requestAnimationFrame(step);
     }
     raf = requestAnimationFrame(step);

@@ -170,3 +170,6 @@ body.admin { background: var(--paper); min-height: 100vh; }
 .save-pill[data-state="saving"] { background: #e8efff; color: var(--blue-700); }
 .save-pill[data-state="saving"]::before { animation: blinkDot .8s infinite; }
 .save-pill[data-state="error"] { background: #fdecef; color: #c42a42; }
+
+/* side-panel buttons: long labels wrap instead of being clipped */
+.side .btn { white-space: normal; text-align: center; line-height: 1.3; height: auto; min-height: 50px; padding-block: .7em; }

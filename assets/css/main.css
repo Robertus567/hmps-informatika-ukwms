@@ -717,3 +717,10 @@ html.is-leaving .loader { opacity: 1; visibility: visible; transition: opacity .
   .filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filter[data-filter="all"], .filter:last-child { grid-column: 1 / -1; }
 }
+
+/* Performance: animations nobody can see should not run.
+   Hidden page loader and the page behind the full-screen reveal are paused/removed from rendering. */
+.loader[hidden] { display: none; }
+html.is-ready:not(.is-leaving) .loader * { animation-play-state: paused; }
+body.reveal-lock > :not(.reveal) { visibility: hidden; }
+body.reveal-lock > :not(.reveal) * { animation-play-state: paused !important; }

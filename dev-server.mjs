@@ -29,8 +29,14 @@ http.createServer(async (req, res) => {
     const name = pathname.slice(5).replace(/[^a-z0-9-]/gi, '');
     const file = path.join(root, 'api', name + '.js');
     if (!(await tryFile(file))) { res.statusCode = 404; return res.end('Not found'); }
-    const mod = await import(pathToFileURL(file).href + '?v=' + Date.now());
-    return mod.default(req, res);
+    try {
+      const mod = await import(pathToFileURL(file).href + '?v=' + Date.now());
+      return await mod.default(req, res);
+    } catch (e) {
+      console.error(e);
+      res.statusCode = 500;
+      return res.end(JSON.stringify({ error: String(e.message || e) }));
+    }
   }
   if (pathname.endsWith('/')) pathname += 'index.html';
   const base = path.join(root, pathname);

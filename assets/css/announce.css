@@ -224,3 +224,32 @@ body.reveal-lock .buddy { display: none; }
   .rx-scene .rx-bubble { right: auto; left: 50%; bottom: 100%; margin-bottom: 6px; transform: translateX(-50%) scale(.6); transform-origin: 50% 100%; text-align: center; border-radius: 16px; max-width: 80vw; }
   .rx-scene .rx-bito.in .rx-bubble { transform: translateX(-50%); }
 }
+
+/* ===== Performance: same look, cheaper to draw =====
+   Moving backgrounds were animated with background-position (repaints every frame);
+   they now move with transform, which the GPU composites without repainting. */
+.rx-rays { will-change: transform; }
+.rx-floor { background-image: none; animation: none; overflow: hidden; }
+.rx-floor::before {
+  content: ""; position: absolute; left: 0; right: 0; top: -64px; bottom: 0; will-change: transform;
+  background-image: linear-gradient(rgba(127, 208, 255, .35) 1.5px, transparent 1.5px), linear-gradient(90deg, rgba(127, 208, 255, .35) 1.5px, transparent 1.5px);
+  background-size: 64px 64px; animation: floorMove 2.4s linear infinite;
+}
+@keyframes floorMove { to { transform: translateY(64px); } }
+.rx-card { overflow: hidden; }
+.rx-card::after, .rx-spot::before {
+  inset: 0; background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.35) 50%, transparent 70%);
+  background-size: 100% 100%; transform: translateX(-110%); will-change: transform;
+}
+.rx-spot::before { background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,.5) 50%, transparent 65%); }
+.rx-card.show::after { animation: sweepX 1.6s ease .2s; }
+.rx-spot::before { animation: sweepX 1.3s ease .35s both; }
+@keyframes sweepX { from { transform: translateX(-110%); } to { transform: translateX(110%); } }
+.rx-spot { will-change: transform, opacity; }
+/* Rays: the old 240vmax layer faded to transparent at 45% of its farthest-corner radius
+   (240 * 0.7071 * 0.45 = 76.37vmax). Same falloff on a layer just big enough to hold it. */
+.rx-rays {
+  width: 154vmax; height: 154vmax; margin: -77vmax 0 0 -77vmax;
+  mask-image: radial-gradient(circle 76.37vmax at 50% 50%, #000 0, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle 76.37vmax at 50% 50%, #000 0, transparent 100%);
+}

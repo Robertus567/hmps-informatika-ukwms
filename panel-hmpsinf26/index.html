@@ -121,16 +121,16 @@
             <div class="panel__head"><div><h2 id="h-test">Uji Coba Pengumuman</h2><p>Coba alur pengumuman dari sisi pengunjung, lalu kembalikan lagi.</p></div></div>
             <div style="display:grid;gap:10px">
               <button class="btn" type="button" data-test="now">Buka sekarang</button>
-              <button class="btn btn--outline" type="button" data-test="1">Buka 1 menit lagi (lihat countdown)</button>
-              <button class="btn btn--outline" type="button" data-test="off">Tutup lagi (kembali “Coming soon”)</button>
-              <p class="hint">Setiap kali tanggal &amp; jam pengumuman diubah, animasi akan tampil lagi untuk semua pengunjung, termasuk kamu. Setelah uji coba, atur ulang jadwal asli di panel <b>Jadwal Pengumuman</b>.</p>
+              <button class="btn btn--outline" type="button" data-test="1">Buka 1 menit lagi</button>
+              <button class="btn btn--outline" type="button" data-test="off">Tutup lagi</button>
+              <p class="hint"><b>Buka 1 menit lagi</b> menampilkan countdown dulu. <b>Tutup lagi</b> mengembalikan tampilan “Coming soon”. Setiap kali tanggal &amp; jam pengumuman diubah, animasi akan tampil lagi untuk semua pengunjung, termasuk kamu. Setelah uji coba, atur ulang jadwal asli di panel <b>Jadwal Pengumuman</b>.</p>
             </div>
           </section>
           <section class="panel" aria-labelledby="h-tools">
             <div class="panel__head"><div><h2 id="h-tools">Animasi</h2><p>Cek tampilan sebelum dibuka ke publik.</p></div></div>
             <div style="display:grid;gap:10px">
               <a class="btn btn--outline" href="/pengumuman?preview=1" target="_blank" rel="noopener">Preview animasi pengumuman</a>
-              <button class="btn btn--danger" type="button" id="replay">Tampilkan ulang animasi ke semua pengunjung</button>
+              <button class="btn btn--danger" type="button" id="replay">Putar ulang animasi untuk semua</button>
               <p class="hint">Pengunjung hanya melihat animasi sekali. Tombol merah membuat semua pengunjung melihat animasinya lagi, misalnya setelah daftar nama diperbaiki.</p>
               <p class="hint" id="storage-info"></p>
             </div>

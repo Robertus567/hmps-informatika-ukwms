@@ -21,6 +21,7 @@
       html.classList.add('is-ready');
       html.classList.remove('is-leaving');
       document.dispatchEvent(new CustomEvent('site:ready'));
+      if (loader) setTimeout(() => { if (!html.classList.contains('is-leaving')) loader.hidden = true; }, 500); // after fade-out
     }, Math.max(0, minShow - elapsed));
   }
   if (document.readyState === 'complete') ready();
@@ -29,7 +30,7 @@
   setTimeout(() => html.classList.add('is-ready'), 4000);
 
   window.addEventListener('pageshow', (e) => {
-    if (e.persisted) { html.classList.remove('is-leaving'); html.classList.add('is-ready'); }
+    if (e.persisted) { html.classList.remove('is-leaving'); html.classList.add('is-ready'); if (loader) loader.hidden = true; }
   });
 
   document.addEventListener('click', (e) => {
@@ -42,6 +43,7 @@
     if (url.pathname === location.pathname && url.hash) return;
     if (url.pathname === location.pathname && url.search === location.search) { e.preventDefault(); return; }
     e.preventDefault();
+    if (loader) loader.hidden = false;
     html.classList.remove('is-ready');
     html.classList.add('is-leaving');
     document.body.classList.remove('nav-open');
