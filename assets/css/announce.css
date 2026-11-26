@@ -253,3 +253,8 @@ body.reveal-lock .buddy { display: none; }
   mask-image: radial-gradient(circle 76.37vmax at 50% 50%, #000 0, transparent 100%);
   -webkit-mask-image: radial-gradient(circle 76.37vmax at 50% 50%, #000 0, transparent 100%);
 }
+
+/* Division labels: wrap inside the card instead of being cut off on narrow phones */
+.rx-card .t, .winner__text { min-width: 0; max-width: 100%; }
+.rx-card .chip, .winner .chip, .rx-spot .chip { white-space: normal; max-width: 100%; overflow-wrap: break-word; text-align: left; line-height: 1.3; }
+.rx-spot .chip { text-align: center; }
